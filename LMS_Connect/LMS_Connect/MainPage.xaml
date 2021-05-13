@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="LMS_Connect.MainPage">
+
+    <StackLayout>
+        <Frame BackgroundColor="#2196F3" Padding="24" CornerRadius="0">
+            <Label Text="LMS Connector for Tidal/Qobuz" HorizontalTextAlignment="Center" TextColor="White" FontSize="36"/>
+        </Frame>
+        <Label Text="protocol:" />
+        <Entry x:Name="txtProtocol" Text="http"  />
+        <Label Text="LMS Server Name or IP address:" />
+        <Entry x:Name="txtLMSServer" Placeholder="LMS Server Name or IP addres"  />
+        <Label Text="Port:" />
+        <Entry x:Name="txtPort" Text="9000"  />
+        <Button Text="Retrieve Player Data from Server" Clicked="Button_Clicked_1"/>
+        <ListView x:Name="lstPlayers" Header="Players:" IsVisible="false" 
+			  ItemTapped="OnItemTapped" ItemsSource="{Binding .}"/>
+        <Label x:Name="lblMsg" Text="Message:" />
+    </StackLayout>
+
+</ContentPage>
