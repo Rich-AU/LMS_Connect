@@ -28,7 +28,7 @@ namespace LMS_Connect.Droid
 
             if (Intent.ActionSend.Equals(Intent.Action) && Intent.Type != null && "text/plain".Equals(Intent.Type))
             {
-                handleSendUrl();
+                handleIntent();
             }
         }
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
@@ -38,7 +38,12 @@ namespace LMS_Connect.Droid
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
 
-        private void handleSendUrl()
+        public virtual void handleIntent()
+		{
+            handleSendUrl();
+
+        }
+        public void handleSendUrl(bool IsQueue =false)
         {
             if (!Preferences.ContainsKey("protocol") || !Preferences.ContainsKey("LMSServer") || !Preferences.ContainsKey("port") || !Preferences.ContainsKey("c_id"))
             {
@@ -67,6 +72,7 @@ namespace LMS_Connect.Droid
 			{
                 var DomainIndex = url.IndexOf(".com/")+5;
                 var info = url.Substring(DomainIndex).Split("/");
+                string LMSAction = IsQueue ? "add" : "play";
                 if (info.Length>=2)
 				{
                     url = "Service Provider:" + ServiceProvider + " Type:" + info[0] + " ID:" + info[1];
@@ -80,15 +86,15 @@ namespace LMS_Connect.Droid
 
                         if (info[0].Equals("track", StringComparison.OrdinalIgnoreCase))
                         {
-                                cmdPara = "\"playlist\",\"play\",\"wimp://" + info[1] + ".flac\"";
+                                cmdPara = "\"playlist\",\""+LMSAction+"\",\"wimp://" + info[1] + ".flac\"";
                             }
                         else if (info[0].Equals("album", StringComparison.OrdinalIgnoreCase))
                         {
-                            cmdPara = "\"playlist\",\"play\",\"wimp://album:" + info[1] + ".tdl\"";
+                            cmdPara = "\"playlist\",\"" + LMSAction + "\",\"wimp://album:" + info[1] + ".tdl\"";
                         }
                         else if (info[0].Equals("playlist", StringComparison.OrdinalIgnoreCase))
                         {
-                            cmdPara = "\"playlist\",\"play\",\"wimp://playlist:" + info[1] + ".tdl\"";
+                            cmdPara = "\"playlist\",\"" + LMSAction + "\",\"wimp://playlist:" + info[1] + ".tdl\"";
                         }
 
                     }
@@ -96,15 +102,15 @@ namespace LMS_Connect.Droid
 					{
                         if (info[0].Equals("track", StringComparison.OrdinalIgnoreCase))
                         {
-                            cmdPara = "\"playlist\",\"play\",\"qobuz://" + info[1] + ".flac\"";
+                            cmdPara = "\"playlist\",\"" + LMSAction + "\",\"qobuz://" + info[1] + ".flac\"";
                         }
                         else if (info[0].Equals("album", StringComparison.OrdinalIgnoreCase))
                         {
-                            cmdPara = "\"playlist\",\"play\",\"qobuz://album:" + info[1] + ".qbz\"";
+                            cmdPara = "\"playlist\",\"" + LMSAction + "\",\"qobuz://album:" + info[1] + ".qbz\"";
                         }
                         else if (info[0].Equals("playlist", StringComparison.OrdinalIgnoreCase))
                         {
-                            cmdPara = "\"playlist\",\"play\",\"qobuz://playlist:" + info[1] + ".qbz\"";
+                            cmdPara = "\"playlist\",\"" + LMSAction + "\",\"qobuz://playlist:" + info[1] + ".qbz\"";
                         }
                     }
                     if (cmdPara !="")SendLMSRequest(DefinedProtocol, DefinedLMSServer, DefinedPort, DefinedPlayerid, cmdPara);
@@ -162,4 +168,15 @@ namespace LMS_Connect.Droid
             {  }
         }
     }
+
+    [Activity(Label = "LMS_Connect", Name = "com.companyname.lms_connect.QueueActivity")]
+    public class QueueActivity: MainActivity
+	{
+        public override void handleIntent()
+        {
+            handleSendUrl(true);
+
+        }
+    }
+
 }

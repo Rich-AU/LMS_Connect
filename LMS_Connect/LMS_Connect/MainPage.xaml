@@ -9,7 +9,7 @@
         </Frame>
         <Label Text="protocol:" />
         <Entry x:Name="txtProtocol" Text="http"  />
-        <Label Text="LMS Server Name or IP address:" />
+        <Label Text="LMS Server IP address(Not host name):" />
         <Entry x:Name="txtLMSServer" Placeholder="LMS Server Name or IP addres"  />
         <Label Text="Port:" />
         <Entry x:Name="txtPort" Text="9000"  />

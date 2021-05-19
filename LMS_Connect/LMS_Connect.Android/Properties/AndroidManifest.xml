@@ -9,6 +9,13 @@
 				<data android:mimeType="text/plain" />
 			</intent-filter>
     </activity>
+  		<activity android:name="com.companyname.lms_connect.QueueActivity">
+			<intent-filter android:label="Queu on LMS" android:icon="@mipmap/Add">
+				<action android:name="android.intent.action.SEND" />
+				<category android:name="android.intent.category.DEFAULT" />
+				<data android:mimeType="text/plain" />
+			</intent-filter>
+    </activity>
 	</application>
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 </manifest>
