@@ -51,7 +51,7 @@ namespace LMS_Connect.Droid
                 FinishAffinity();
             }
             var DefinedProtocol = Preferences.Get("protocol", "http");
-            var DefinedLMSServer = Preferences.Get("LMSServer", "");
+            var DefinedLMSServer = Preferences.Get("LMSIP", "");
             var DefinedPort = Preferences.Get("port", "9000");
             var DefinedPlayerid = Preferences.Get("c_id", "");
 
@@ -75,7 +75,9 @@ namespace LMS_Connect.Droid
                 string LMSAction = IsQueue ? "add" : "play";
                 if (info.Length>=2)
 				{
-                    url = "Service Provider:" + ServiceProvider + " Type:" + info[0] + " ID:" + info[1];
+                    // url = "Service Provider:" + ServiceProvider + " Type:" + info[0] + " ID:" + info[1];
+                    string SharedType = info[info.Length - 2];
+                    string SharedId = info[info.Length - 1];
 
 
                     //string playerid = "b8:27:eb:8f:24:4b";
@@ -84,33 +86,33 @@ namespace LMS_Connect.Droid
                     if (ServiceProvider == "Tidal" )                       
 					{
 
-                        if (info[0].Equals("track", StringComparison.OrdinalIgnoreCase))
+                        if (SharedType.Equals("track", StringComparison.OrdinalIgnoreCase))
                         {
-                                cmdPara = "\"playlist\",\""+LMSAction+"\",\"wimp://" + info[1] + ".flac\"";
+                                cmdPara = "\"playlist\",\""+LMSAction+"\",\"wimp://" + SharedId + ".flac\"";
                             }
-                        else if (info[0].Equals("album", StringComparison.OrdinalIgnoreCase))
+                        else if (SharedType.Equals("album", StringComparison.OrdinalIgnoreCase))
                         {
-                            cmdPara = "\"playlist\",\"" + LMSAction + "\",\"wimp://album:" + info[1] + ".tdl\"";
+                            cmdPara = "\"playlist\",\"" + LMSAction + "\",\"wimp://album:" + SharedId + ".tdl\"";
                         }
-                        else if (info[0].Equals("playlist", StringComparison.OrdinalIgnoreCase))
+                        else if (SharedType.Equals("playlist", StringComparison.OrdinalIgnoreCase))
                         {
-                            cmdPara = "\"playlist\",\"" + LMSAction + "\",\"wimp://playlist:" + info[1] + ".tdl\"";
+                            cmdPara = "\"playlist\",\"" + LMSAction + "\",\"wimp://playlist:" + SharedId + ".tdl\"";
                         }
 
                     }
                     else
 					{
-                        if (info[0].Equals("track", StringComparison.OrdinalIgnoreCase))
+                        if (SharedType.Equals("track", StringComparison.OrdinalIgnoreCase))
                         {
-                            cmdPara = "\"playlist\",\"" + LMSAction + "\",\"qobuz://" + info[1] + ".flac\"";
+                            cmdPara = "\"playlist\",\"" + LMSAction + "\",\"qobuz://" + SharedId + ".flac\"";
                         }
-                        else if (info[0].Equals("album", StringComparison.OrdinalIgnoreCase))
+                        else if (SharedType.Equals("album", StringComparison.OrdinalIgnoreCase))
                         {
-                            cmdPara = "\"playlist\",\"" + LMSAction + "\",\"qobuz://album:" + info[1] + ".qbz\"";
+                            cmdPara = "\"playlist\",\"" + LMSAction + "\",\"qobuz://album:" + SharedId + ".qbz\"";
                         }
-                        else if (info[0].Equals("playlist", StringComparison.OrdinalIgnoreCase))
+                        else if (SharedType.Equals("playlist", StringComparison.OrdinalIgnoreCase))
                         {
-                            cmdPara = "\"playlist\",\"" + LMSAction + "\",\"qobuz://playlist:" + info[1] + ".qbz\"";
+                            cmdPara = "\"playlist\",\"" + LMSAction + "\",\"qobuz://playlist:" + SharedId + ".qbz\"";
                         }
                     }
                     if (cmdPara !="")SendLMSRequest(DefinedProtocol, DefinedLMSServer, DefinedPort, DefinedPlayerid, cmdPara);
