@@ -9,6 +9,7 @@ using Android.OS;
 using Android.Content;
 using System.Net.Http;
 using Xamarin.Essentials;
+using System.Linq;
 
 namespace LMS_Connect.Droid
 {
@@ -45,7 +46,8 @@ namespace LMS_Connect.Droid
         }
         public void handleSendUrl(bool IsQueue =false)
         {
-            if (!Preferences.ContainsKey("protocol") || !Preferences.ContainsKey("LMSServer") || !Preferences.ContainsKey("port") || !Preferences.ContainsKey("c_id"))
+            string[] SupportedFileType = { "mp3", "wav", "flac", "ogg", "aac","m3u","plx","ASX","WPL","m3u8" };
+            if (!Preferences.ContainsKey("LMSIP") || !Preferences.ContainsKey("port") || !Preferences.ContainsKey("c_id"))
             {
                 FinishAndRemoveTask();
                 FinishAffinity();
@@ -61,8 +63,13 @@ namespace LMS_Connect.Droid
             var ServiceProvider = "";
             StringComparison comp = StringComparison.OrdinalIgnoreCase;
             if (url.Contains("tidal.com", comp))
-            { ServiceProvider = "Tidal"; } 
-            else if(url.Contains("Qobuz.com", comp)) ServiceProvider = "Qobuz";
+            { ServiceProvider = "Tidal"; }
+            else if (url.Contains("Qobuz.com", comp)) { ServiceProvider = "Qobuz"; }
+            else {
+                string filetype = url.Substring(url.LastIndexOf(".") + 1, url.Length - url.LastIndexOf(".") - 1);
+                if (SupportedFileType.Contains(filetype)) ServiceProvider = "OnlineStream";
+            } 
+            //if (){ }
             if (ServiceProvider == "")
 			{
                 FinishAndRemoveTask();
@@ -100,8 +107,8 @@ namespace LMS_Connect.Droid
                         }
 
                     }
-                    else
-					{
+                    else if (ServiceProvider == "Qobuz")
+                    {
                         if (SharedType.Equals("track", StringComparison.OrdinalIgnoreCase))
                         {
                             cmdPara = "\"playlist\",\"" + LMSAction + "\",\"qobuz://" + SharedId + ".flac\"";
@@ -114,6 +121,11 @@ namespace LMS_Connect.Droid
                         {
                             cmdPara = "\"playlist\",\"" + LMSAction + "\",\"qobuz://playlist:" + SharedId + ".qbz\"";
                         }
+                    }
+					else
+					{
+                        cmdPara = "\"playlist\",\"" + LMSAction + "\",\""+url+"\"";
+
                     }
                     if (cmdPara !="")SendLMSRequest(DefinedProtocol, DefinedLMSServer, DefinedPort, DefinedPlayerid, cmdPara);
 
