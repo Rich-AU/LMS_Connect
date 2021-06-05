@@ -47,6 +47,7 @@ namespace LMS_Connect.Droid
         public void handleSendUrl(bool IsQueue =false)
         {
             string[] SupportedFileType = { "mp3", "wav", "flac", "ogg", "aac","m3u","plx","ASX","WPL","m3u8" };
+            string[] YoutubeDomains = { "youtube.com", "youtu.be" };
             if (!Preferences.ContainsKey("LMSIP") || !Preferences.ContainsKey("port") || !Preferences.ContainsKey("c_id"))
             {
                 FinishAndRemoveTask();
@@ -65,12 +66,14 @@ namespace LMS_Connect.Droid
             if (url.Contains("tidal.com", comp))
             { ServiceProvider = "Tidal"; }
             else if (url.Contains("Qobuz.com", comp)) { ServiceProvider = "Qobuz"; }
-            else {
-                string filetype = url.Substring(url.LastIndexOf(".") + 1, url.Length - url.LastIndexOf(".") - 1);
-                if (SupportedFileType.Contains(filetype)) ServiceProvider = "OnlineStream";
-            } 
-            //if (){ }
-            if (ServiceProvider == "")
+			else
+			{
+				string filetype = url.Substring(url.LastIndexOf(".") + 1, url.Length - url.LastIndexOf(".") - 1);
+				if (SupportedFileType.Contains(filetype) || YoutubeDomains.Any(s=>url.Contains(s,comp)))ServiceProvider = "OnlineStream";
+			}
+
+
+			if (ServiceProvider == "")
 			{
                 FinishAndRemoveTask();
                 FinishAffinity();
