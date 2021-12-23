@@ -10,7 +10,7 @@
         <TableView>
             <TableRoot>
                 <TableSection>
-                    <SwitchCell x:Name="swhAutoScan"  OnChanged="swhAutoScan_OnChanged" Text="Auto Scan LMS:" On="true" />
+                    <SwitchCell x:Name="swhAutoScan"  OnChanged="swhAutoScan_OnChanged" Text="Auto Scan LMS:" On="false" />
                     <EntryCell x:Name="txtLMSName" IsEnabled="False" Label="LMS Name:" Text="" />
                     <EntryCell x:Name="txtLMSIP" IsEnabled="False" Label="LMS IP:" Text=""/>
                     <EntryCell x:Name="txtPort" IsEnabled="False" Label="LMS Port:" Text="9000"/>

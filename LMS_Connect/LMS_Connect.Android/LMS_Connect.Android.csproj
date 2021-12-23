@@ -45,6 +45,7 @@
     </AndroidSigningKeyStore>
     <AndroidSigningStorePass>
     </AndroidSigningStorePass>
+    <DocumentationFile>bin\Debug\LMS_Connect.Android.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>

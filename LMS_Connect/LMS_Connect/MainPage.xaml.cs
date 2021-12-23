@@ -12,6 +12,8 @@ using System.Collections.ObjectModel;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using System.IO;
+using System.Reflection;
 
 namespace LMS_Connect
 {
@@ -22,10 +24,12 @@ namespace LMS_Connect
 		LMSInfo lmsInfo = new LMSInfo();
 		public MainPage()
 		{
+			DependencyService.Get<IAccessFile>().CreateFile("Start Initialising Component.");
 			InitializeComponent();
-
+			DependencyService.Get<IAccessFile>().CreateFile("End Initialising Component, start checing preferences.");
 
 			if (Preferences.ContainsKey("players")) {
+				DependencyService.Get<IAccessFile>().CreateFile("Saved preferences found.");
 				txtLMSName.Text = Preferences.Get("LMSName", "");
 				txtLMSIP.Text = Preferences.Get("LMSIP", "");
 				txtPort.Text = Preferences.Get("port", "9000");
@@ -45,27 +49,31 @@ namespace LMS_Connect
 			}
 			else
 			{
+				DependencyService.Get<IAccessFile>().CreateFile("Saved preferences not found, discovering LMS.");
 				lblMsg.Text = "Message: Discovering LMS...";
 				lblMsg.TextColor = Color.Black;
 				lmsInfo.AutoDiscover();
+				DependencyService.Get<IAccessFile>().CreateFile("Discover completed.");
 				txtLMSName.Text = lmsInfo.name;
 				txtLMSIP.Text = lmsInfo.ip;
 				txtPort.Text = lmsInfo.port.ToString();
 				this.BindingContext = Itemplayers;
 				if (lmsInfo.ip == "")
 				{
+					DependencyService.Get<IAccessFile>().CreateFile("LMS not found.");
 					lblMsg.Text = "Erro: LMS not found.";
 					lblMsg.TextColor = Color.Red;
 				}
 				else
 				{
+					DependencyService.Get<IAccessFile>().CreateFile("LMS found.");
 					Preferences.Set("LMSName", lmsInfo.name);
 					_ = GetPlayers();
 				}
 
 			}
 
-
+			DependencyService.Get<IAccessFile>().CreateFile("UI Completed.");
 		}
 		void OnItemTapped(object sender, ItemTappedEventArgs e)
 		{
@@ -86,20 +94,24 @@ namespace LMS_Connect
 			{ lblMsg.Text = "Error:please fill in all LMS server info"; lblMsg.TextColor = Color.Red; }
 			else
 			{
+
+				DependencyService.Get<IAccessFile>().CreateFile("Start getting players.");
 				Preferences.Set("LMSIP", txtLMSIP.Text.Trim());
 				Preferences.Set("port", txtPort.Text.Trim());
 				HttpClient client = new HttpClient();
 				Uri uri = new Uri(string.Format("http://" + txtLMSIP.Text.Trim() + ":" + txtPort.Text.Trim() + "/jsonrpc.js", string.Empty));
 
 				string json = "{\"id\":1,\"method\":\"slim.request\",\"params\":[\"\",[\"players\",\"0\",\"10\"]]}";
+
 				StringContent content = new StringContent(json);
 
 				HttpResponseMessage response = null;
 				try
 				{
+					DependencyService.Get<IAccessFile>().CreateFile("Start sending players http request.");
 					response = await client.PostAsync(uri, content);
 					var contents = await response.Content.ReadAsStringAsync();
-					Debug.WriteLine(response);
+					DependencyService.Get<IAccessFile>().CreateFile("Received sending players http response.");
 					JObject ObjPlayers = JObject.Parse(contents);
 					dynamic res = Newtonsoft.Json.JsonConvert.DeserializeObject(contents);
 
@@ -213,24 +225,32 @@ namespace LMS_Connect
 
 		public void AutoDiscover()
 		{
+			DependencyService.Get<IAccessFile>().CreateFile("Start LMS Auto discover.");
 			int PORT = 3483;
+			DependencyService.Get<IAccessFile>().CreateFile("Creating upd client.");
 			UdpClient udpClient = new UdpClient();
 			udpClient.Client.Bind(new IPEndPoint(IPAddress.Any, PORT));
 			var from = new IPEndPoint(0, 0);
 			byte[] data = { 0x65, 0x49, 0x50, 0x41, 0x44, 0x00, 0x4e, 0x41, 0x4d, 0x45, 0x00, 0x4a, 0x53, 0x4f, 0x4e, 0x00 };
 			//65 49 50 41 44  00 4e 41 4d 45 00 4a 53 4f 4e 00
 			var startTime = DateTime.UtcNow;
+
+			DependencyService.Get<IAccessFile>().CreateFile("Sending discover packet.");
 			udpClient.Send(data, data.Length, "255.255.255.255", PORT);
+			DependencyService.Get<IAccessFile>().CreateFile("Receiving discover response.");
 			while (DateTime.UtcNow - startTime < TimeSpan.FromSeconds(10))
 			{
 				var recvBuffer = udpClient.Receive(ref from);
 				if (recvBuffer[0] == 0x45)
 				{
+					DependencyService.Get<IAccessFile>().CreateFile("Received discover response.");
+					DependencyService.Get<IAccessFile>().CreateFile(System.Text.Encoding.UTF8.GetString(recvBuffer));
 					ip = from.Address.ToString();
 					byte JSONSeparator = 0x04;
 					int JSONIndex = Array.IndexOf(recvBuffer, JSONSeparator);
 					name = System.Text.Encoding.UTF8.GetString(recvBuffer, 6, JSONIndex - 10);
 					port = int.Parse(System.Text.Encoding.UTF8.GetString(recvBuffer, JSONIndex + 1, recvBuffer.Length - JSONIndex - 1));
+					DependencyService.Get<IAccessFile>().CreateFile("End LMS Auto discover.");
 					break;
 
 				}
@@ -239,4 +259,8 @@ namespace LMS_Connect
 		}
 	}
 
+	public interface IAccessFile
+	{
+		void CreateFile(string LogText);
+	}
 }

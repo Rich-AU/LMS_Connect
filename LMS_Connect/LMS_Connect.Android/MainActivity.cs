@@ -10,7 +10,12 @@ using Android.Content;
 using System.Net.Http;
 using Xamarin.Essentials;
 using System.Linq;
+using System.IO;
+using LMS_Connect;
+using System.Text;
+using LMS_Connect.Droid;
 
+[assembly: Xamarin.Forms.Dependency(typeof(AccessFileImplement))]
 namespace LMS_Connect.Droid
 {
     [Activity(Label = "LMS_Connect", Name = "com.companyname.lms_connect.MainActivity", Icon = "@mipmap/play", Theme = "@style/MainTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize )]
@@ -92,6 +97,12 @@ namespace LMS_Connect.Droid
 
                     //string playerid = "b8:27:eb:8f:24:4b";
                     string cmdPara="";
+
+                    //v1.6 new feature #1 turn on player automatically
+
+                    //cmdPara = "\"power\",\"1\"";
+                    //SendLMSRequest(DefinedProtocol, DefinedLMSServer, DefinedPort, DefinedPlayerid, cmdPara);
+                    //cmdPara = "";
 
                     if (ServiceProvider == "Tidal" )                       
 					{
@@ -195,5 +206,54 @@ namespace LMS_Connect.Droid
 
         }
     }
+
+    public class AccessFileImplement : IAccessFile
+    {
+        void IAccessFile.CreateFile(string LogText)
+        {
+            string FileName = "LMSConnectLog.txt";
+            string DownloadsPath = Path.Combine(Android.OS.Environment.ExternalStorageDirectory.AbsolutePath, Android.OS.Environment.DirectoryDownloads);
+            string filePath = Path.Combine(DownloadsPath, FileName);
+            File.AppendAllText(filePath, DateTime.Now.ToLongTimeString()+" "+ DateTime.Now.ToLongDateString() + ":" + LogText +"\r\n");
+        }
+    }
+
+    //public class LogWriterImplement:LogWriter
+    //{
+
+
+    //    public LogWriter(string logMessage)
+    //    {
+    //        LogWrite(logMessage);
+    //    }
+    //    public void LogWrite(string logMessage)
+    //    {
+    //        string path = Android.OS.Environment.ExternalStorageDirectory.AbsolutePath;
+    //        string filePath = System.IO.Path.Combine(path, "log.txt");
+    //        try
+    //        {
+    //            using (StreamWriter w = File.AppendText(filePath))
+    //            {
+    //                Log(logMessage, w);
+    //            }
+    //        }
+    //        catch (Exception ex)
+    //        {
+    //        }
+    //    }
+
+    //    public void Log(string logMessage, TextWriter txtWriter)
+    //    {
+    //        try
+    //        {
+    //            //txtWriter.Write("\r\nLog Entry : ");
+    //            txtWriter.WriteLine("{0} {1} : {2}", DateTime.Now.ToLongTimeString(),
+    //                DateTime.Now.ToLongDateString(), logMessage);
+    //        }
+    //        catch (Exception ex)
+    //        {
+    //        }
+    //    }
+    //}
 
 }
