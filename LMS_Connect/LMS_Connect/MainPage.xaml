@@ -11,13 +11,13 @@
             <TableRoot>
                 <TableSection>
                     <SwitchCell x:Name="swhAutoScan"  OnChanged="swhAutoScan_OnChanged" Text="Auto Scan LMS:" On="false" />
-                    <EntryCell x:Name="txtLMSName" IsEnabled="False" Label="LMS Name:" Text="" />
-                    <EntryCell x:Name="txtLMSIP" IsEnabled="False" Label="LMS IP:" Text=""/>
-                    <EntryCell x:Name="txtPort" IsEnabled="False" Label="LMS Port:" Text="9000"/>
+                    <EntryCell x:Name="txtLMSName" IsEnabled="True" Label="LMS Name:" Text="" />
+                    <EntryCell x:Name="txtLMSIP" IsEnabled="True" Label="LMS IP:" Text=""/>
+                    <EntryCell x:Name="txtPort" IsEnabled="True" Label="LMS Port:" Text="9000"/>
                 </TableSection>
             </TableRoot>
         </TableView>
-        <Button x:Name="btnGetPlayers"  IsVisible="false"  Text="Retrieve Player Data from Server" Clicked="Button_Clicked_1"/>
+        <Button x:Name="btnGetPlayers"  IsVisible="true"  Text="Retrieve Player Data from Server" Clicked="Button_Clicked_1"/>
         <ListView x:Name="lstPlayers" Header="Players:" IsVisible="false"
 			  ItemTapped="OnItemTapped" ItemsSource="{Binding .}"/>
         <Label x:Name="lblMsg" Text="Message:" />

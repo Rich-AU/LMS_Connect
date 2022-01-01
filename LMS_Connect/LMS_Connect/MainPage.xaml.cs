@@ -49,24 +49,27 @@ namespace LMS_Connect
 			}
 			else
 			{
-				DependencyService.Get<IAccessFile>().CreateFile("Saved preferences not found, discovering LMS.");
-				lblMsg.Text = "Message: Discovering LMS...";
-				lblMsg.TextColor = Color.Black;
-				lmsInfo.AutoDiscover();
-				DependencyService.Get<IAccessFile>().CreateFile("Discover completed.");
-				txtLMSName.Text = lmsInfo.name;
-				txtLMSIP.Text = lmsInfo.ip;
-				txtPort.Text = lmsInfo.port.ToString();
+				//DependencyService.Get<IAccessFile>().CreateFile("Saved preferences not found, discovering LMS.");
+				//lblMsg.Text = "Message: Discovering LMS...";
+				//lblMsg.TextColor = Color.Black;
+				//lmsInfo.AutoDiscover();
+				//DependencyService.Get<IAccessFile>().CreateFile("Discover completed.");
+
 				this.BindingContext = Itemplayers;
 				if (lmsInfo.ip == "")
 				{
-					DependencyService.Get<IAccessFile>().CreateFile("LMS not found.");
-					lblMsg.Text = "Erro: LMS not found.";
-					lblMsg.TextColor = Color.Red;
+					//DependencyService.Get<IAccessFile>().CreateFile("LMS not found.");
+					//lblMsg.Text = "Erro: LMS not found.";
+					//lblMsg.TextColor = Color.Red;
+					txtLMSIP.Text = "";
+					txtPort.Text = "9000";
 				}
 				else
 				{
 					DependencyService.Get<IAccessFile>().CreateFile("LMS found.");
+					txtLMSName.Text = lmsInfo.name;
+					txtLMSIP.Text = lmsInfo.ip;
+					txtPort.Text = lmsInfo.port.ToString();
 					Preferences.Set("LMSName", lmsInfo.name);
 					_ = GetPlayers();
 				}
@@ -116,11 +119,10 @@ namespace LMS_Connect
 					dynamic res = Newtonsoft.Json.JsonConvert.DeserializeObject(contents);
 
 					// get JSON result objects into a list
-					IList<JToken> results = ObjPlayers["result"]["players_loop"].Children().ToList();
-
 					// serialize JSON results into .NET objects
-					if (results.Count > 0)
+					if (ObjPlayers["result"]["players_loop"] != null ) // player exists
 					{
+						IList<JToken> results = ObjPlayers["result"]["players_loop"].Children().ToList();
 						Players.Clear();
 						Itemplayers.Clear();
 						foreach (JToken result in results)
@@ -143,6 +145,10 @@ namespace LMS_Connect
 					}
 					else
 					{
+						Players.Clear();
+						Itemplayers.Clear();
+						lstPlayers.Header = "Players: please tap to select the one for streaming.";
+						lstPlayers.IsVisible = false;
 						lblMsg.Text = "Error: No player found";
 						lblMsg.TextColor = Color.Red;
 					}
@@ -197,6 +203,7 @@ namespace LMS_Connect
 				Preferences.Remove("LMSName");
 				txtLMSIP.IsEnabled = true;
 				txtPort.IsEnabled = true;
+				txtPort.Text = "9000";
 				btnGetPlayers.IsVisible = true;
 			}
 		}
@@ -225,35 +232,45 @@ namespace LMS_Connect
 
 		public void AutoDiscover()
 		{
-			DependencyService.Get<IAccessFile>().CreateFile("Start LMS Auto discover.");
-			int PORT = 3483;
-			DependencyService.Get<IAccessFile>().CreateFile("Creating upd client.");
-			UdpClient udpClient = new UdpClient();
-			udpClient.Client.Bind(new IPEndPoint(IPAddress.Any, PORT));
-			var from = new IPEndPoint(0, 0);
-			byte[] data = { 0x65, 0x49, 0x50, 0x41, 0x44, 0x00, 0x4e, 0x41, 0x4d, 0x45, 0x00, 0x4a, 0x53, 0x4f, 0x4e, 0x00 };
-			//65 49 50 41 44  00 4e 41 4d 45 00 4a 53 4f 4e 00
-			var startTime = DateTime.UtcNow;
-
-			DependencyService.Get<IAccessFile>().CreateFile("Sending discover packet.");
-			udpClient.Send(data, data.Length, "255.255.255.255", PORT);
-			DependencyService.Get<IAccessFile>().CreateFile("Receiving discover response.");
-			while (DateTime.UtcNow - startTime < TimeSpan.FromSeconds(10))
+			try
 			{
-				var recvBuffer = udpClient.Receive(ref from);
-				if (recvBuffer[0] == 0x45)
-				{
-					DependencyService.Get<IAccessFile>().CreateFile("Received discover response.");
-					DependencyService.Get<IAccessFile>().CreateFile(System.Text.Encoding.UTF8.GetString(recvBuffer));
-					ip = from.Address.ToString();
-					byte JSONSeparator = 0x04;
-					int JSONIndex = Array.IndexOf(recvBuffer, JSONSeparator);
-					name = System.Text.Encoding.UTF8.GetString(recvBuffer, 6, JSONIndex - 10);
-					port = int.Parse(System.Text.Encoding.UTF8.GetString(recvBuffer, JSONIndex + 1, recvBuffer.Length - JSONIndex - 1));
-					DependencyService.Get<IAccessFile>().CreateFile("End LMS Auto discover.");
-					break;
+				DependencyService.Get<IAccessFile>().CreateFile("Start LMS Auto discover.");
+				int PORT = 3483;
+				DependencyService.Get<IAccessFile>().CreateFile("Creating upd client.");
+				UdpClient udpClient = new UdpClient();
+				udpClient.Client.Bind(new IPEndPoint(IPAddress.Any, PORT));
+				var from = new IPEndPoint(0, 0);
+				byte[] data = { 0x65, 0x49, 0x50, 0x41, 0x44, 0x00, 0x4e, 0x41, 0x4d, 0x45, 0x00, 0x4a, 0x53, 0x4f, 0x4e, 0x00 };
+				//65 49 50 41 44  00 4e 41 4d 45 00 4a 53 4f 4e 00
+				var startTime = DateTime.UtcNow;
 
+				DependencyService.Get<IAccessFile>().CreateFile("Sending discover packet.");
+				udpClient.Send(data, data.Length, "255.255.255.255", PORT);
+				DependencyService.Get<IAccessFile>().CreateFile("Receiving discover response.");
+				while (DateTime.UtcNow - startTime < TimeSpan.FromSeconds(10))
+				{
+					var recvBuffer = udpClient.Receive(ref from);
+					if (recvBuffer[0] == 0x45)
+					{
+						DependencyService.Get<IAccessFile>().CreateFile("Received discover response.");
+						DependencyService.Get<IAccessFile>().CreateFile(System.Text.Encoding.UTF8.GetString(recvBuffer));
+						for (int i = 0; i < recvBuffer.Length; i++) DependencyService.Get<IAccessFile>().CreateFile("["+i+"]:"+recvBuffer[i].ToString());
+						 ip = from.Address.ToString();
+						byte JSONSeparator = 0x04;
+						int JSONIndex = Array.IndexOf(recvBuffer, JSONSeparator);
+						name = System.Text.Encoding.UTF8.GetString(recvBuffer, 6, JSONIndex - 10);
+						port = int.Parse(System.Text.Encoding.UTF8.GetString(recvBuffer, JSONIndex + 1, recvBuffer.Length - JSONIndex - 1));
+						DependencyService.Get<IAccessFile>().CreateFile("End LMS Auto discover.");
+						break;
+
+					}
 				}
+
+			}
+			catch ( Exception ex)
+			{
+				DependencyService.Get<IAccessFile>().CreateFile("Auto Discover exception:" + ex.Message);
+
 			}
 
 		}
