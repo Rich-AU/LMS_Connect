@@ -15,7 +15,6 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Reflection;
 
-//v.16
 namespace LMS_Connect
 {
 	public partial class MainPage : ContentPage

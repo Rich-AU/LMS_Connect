@@ -66,7 +66,8 @@ namespace LMS_Connect.Droid
             if (url.Contains("tidal.com", comp))
             { ServiceProvider = "Tidal"; }
             else if (url.Contains("Qobuz.com", comp)) { ServiceProvider = "Qobuz"; }
-			else
+            else if (url.Contains("deezer.page.link", comp)) { ServiceProvider = "deezer"; }
+            else
 			{
 				string filetype = url.Substring(url.LastIndexOf(".") + 1, url.Length - url.LastIndexOf(".") - 1);
 				if (SupportedFileType.Contains(filetype) || YoutubeDomains.Any(s=>url.Contains(s,comp)))ServiceProvider = "OnlineStream";
@@ -93,13 +94,13 @@ namespace LMS_Connect.Droid
                     //string playerid = "b8:27:eb:8f:24:4b";
                     string cmdPara="";
 
-                    if (ServiceProvider == "Tidal" )                       
-					{
+                    if (ServiceProvider == "Tidal")
+                    {
 
                         if (SharedType.Equals("track", StringComparison.OrdinalIgnoreCase))
                         {
-                                cmdPara = "\"playlist\",\""+LMSAction+"\",\"wimp://" + SharedId + ".flac\"";
-                            }
+                            cmdPara = "\"playlist\",\"" + LMSAction + "\",\"wimp://" + SharedId + ".flac\"";
+                        }
                         else if (SharedType.Equals("album", StringComparison.OrdinalIgnoreCase))
                         {
                             cmdPara = "\"playlist\",\"" + LMSAction + "\",\"wimp://album:" + SharedId + ".tdl\"";
@@ -125,7 +126,29 @@ namespace LMS_Connect.Droid
                             cmdPara = "\"playlist\",\"" + LMSAction + "\",\"qobuz://playlist:" + SharedId + ".qbz\"";
                         }
                     }
-					else
+                    else if (ServiceProvider == "deezer")
+                    {
+                        string deezerShareInfo = GetDeezerShareInfo(GetDeezerURL(url));
+                        info = deezerShareInfo.Split("/");
+                        if (info.Length == 2) { 
+                            SharedType = info[0];
+                            SharedId = info[1];
+                         }
+
+                        if (SharedType.Equals("track", StringComparison.OrdinalIgnoreCase))
+                        {
+                            cmdPara = "\"playlist\",\"" + LMSAction + "\",\"deezer://" + SharedId + ".flac\"";
+                        }
+                        else if (SharedType.Equals("album", StringComparison.OrdinalIgnoreCase))
+                        {
+                            cmdPara = "\"playlist\",\"" + LMSAction + "\",\"deezer://album:" + SharedId +"\"";
+                        }
+                        else if (SharedType.Equals("playlist", StringComparison.OrdinalIgnoreCase))
+                        {
+                            cmdPara = "\"playlist\",\"" + LMSAction + "\",\"deezer://playlist:" + SharedId + "\"";
+                        }
+                    }
+                    else
 					{
                         cmdPara = "\"playlist\",\"" + LMSAction + "\",\""+url+"\"";
 
@@ -183,6 +206,40 @@ namespace LMS_Connect.Droid
 			}
             catch (Exception ex)
             {  }
+        }
+    
+        private string GetDeezerURL(string shareURL)
+		{
+            try { return shareURL.Substring(shareURL.LastIndexOf("https://")); }
+            catch { return ""; }
+
+		}
+        private string GetDeezerShareInfo(string DeezerURL)
+        {
+			try
+			{
+                var handler = new HttpClientHandler()
+                {
+                    AllowAutoRedirect = false
+                };
+                HttpClient client = new HttpClient(handler);
+                Uri uri = new Uri(DeezerURL);
+                HttpResponseMessage response = client.GetAsync(uri).Result;
+ 
+
+                if (response.StatusCode==System.Net.HttpStatusCode.Found)
+                {
+                    string FinalURL = response.Headers.Location.ToString();
+                    int startpoint = FinalURL.IndexOf(".com/") + 5;
+                    int endpoint = FinalURL.IndexOf("?");
+
+                    return FinalURL.Substring(startpoint,endpoint-startpoint);
+                }
+				else { return ""; }
+
+            }
+			catch { return ""; }
+
         }
     }
 
