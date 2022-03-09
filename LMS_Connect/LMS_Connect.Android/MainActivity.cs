@@ -109,6 +109,10 @@ namespace LMS_Connect.Droid
                         {
                             cmdPara = "\"playlist\",\"" + LMSAction + "\",\"wimp://playlist:" + SharedId + ".tdl\"";
                         }
+                        else if (SharedType.Equals("mix", StringComparison.OrdinalIgnoreCase))
+                        {
+                            cmdPara = "\"playlist\",\"" + LMSAction + "\",\"wimp://mix:" + SharedId + ".tdl\"";
+                        }
 
                     }
                     else if (ServiceProvider == "Qobuz")
